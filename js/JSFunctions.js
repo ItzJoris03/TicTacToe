@@ -304,7 +304,7 @@ const validateForm = () => {
         initiateGame();
     } catch (oError) {
         // Puts the error message in the errorMsg element.
-        erdocument.getElementById("errorMsg").innerText = oError.message;
+        document.getElementById("errorMsg").innerText = oError.message;
     }
 }
 

@@ -12,7 +12,6 @@ let oGameData = {};
  * Funktionen returnerar inte något värde.
  */
 oGameData.initGlobalObject = function () {
-
     //Datastruktur för vilka platser som är lediga respektive har brickor
     oGameData.gameField = Array('', '', '', '', '', '', '', '', '');
 
@@ -222,12 +221,107 @@ oGameData.checkForDraw = () => {
     return true;
 }
 
+/**
+ * Initiates the game at round 1
+ */
+const initiateGame = () => {
+    // Hide the form (since getELementsByTagName results in a list, we know there is just 1 form so we pick the first item in the list)
+    document.getElementsByTagName('form')[0].classList.add('d-none');
+
+    // Shows the game-area
+    document.getElementById('game-area').classList.remove('d-none');
+
+    // Clear the error messages after validating correctly.
+    document.getElementById("errorMsg").innerText = "";
+
+    // Gets the formdata again (would have prefered using parameters of the function instead.)
+    oGameData.nickNamePlayerOne = document.getElementById("nick1").value;
+    oGameData.nickNamePlayerTwo = document.getElementById("nick2").value;
+    oGameData.colorPlayerOne = document.getElementById("color1").value;
+    oGameData.colorPlayerTwo = document.getElementById("color2").value;
+
+    // Loop through all td-element and set textContent to an empty string
+    document.querySelectorAll('td').forEach(td => {
+        td.textContent = '';
+        td.style.backgroundColor = '#ffffff';
+    });
+
+    // Initiate variables
+    let playerChar, playerName;
+
+    // Randomly choose between true or false using Math.random() < 0.5
+    let random = Math.random() < 0.5;
+
+    // Set currentPlayer based on random true of false value
+    playerChar = random ? oGameData.playerOne : oGameData.playerTwo;
+    playerName = random ? oGameData.nickNamePlayerOne : oGameData.nickNamePlayerTwo;
+    oGameData.currentPlayer = random ? oGameData.playerOne : oGameData.playerTwo;
+
+    // Set the title to show who is the current player
+    document.querySelector('.jumbotron h1').textContent = `Aktuell spelare är ${playerName}`;
+}
+
+/**
+ * Validates the user inputs.
+ */
+const validateForm = () => {
+    // Initializing error messages.
+    const felMsg = {
+        10: "Spelarenamn ska vara minst 5 tecken lång.",
+        11: "Spelarenamn får inte vara samma, vänligen ange ett annat namn.",
+        20: "Valda färgerna får inte vara vita eller svarta, vänligen välj en annan färg.",
+        21: "Färgerna får inte vara lika, vänligen välj en annan färg.",
+    }
+
+    try {
+        // Getting all needed form data
+        const nick1 = document.getElementById("nick1").value;
+        const nick2 = document.getElementById("nick2").value;
+        const color1 = document.getElementById("color1").value;
+        const color2 = document.getElementById("color2").value;
+
+        // Check if the length of both nick name inputs have less characters than 5 -> throws an error.
+        if (nick1.length < 5 || nick2.length < 5) {
+            throw new Error(felMsg[10]);
+        }
+
+        // Check if both nick names are equal.
+        if (nick1 == nick2) {
+            throw new Error(felMsg[11]);
+        }
+
+        // Check if the colors are either pure black or white.
+        if (color1 == "#ffffff" || color2 == "#ffffff" || color1 == "#000000" || color2 == "#000000") {
+            throw new Error(felMsg[20]);
+        }
+
+        // Check if the colors are the same.
+        if (color1 == color2) {
+            throw new Error(felMsg[21]);
+        }
+
+        // Initiates the game
+        initiateGame();
+    } catch (oError) {
+        // Puts the error message in the errorMsg element.
+        erdocument.getElementById("errorMsg").innerText = oError.message;
+    }
+}
+
+window.onload = () => {
+    oGameData.initGlobalObject();
+
+    document.getElementById('game-area').classList.add('d-none');
+
+    document.getElementById('newGame').onclick = validateForm;
+}
+
 //Testutskrifter
 
 // console.log( oGameData );
-oGameData.initGlobalObject();
-console.log(oGameData.gameField);
-console.log(oGameData.checkForGameOver());
+// oGameData.initGlobalObject();
+// console.log(oGameData.gameField);
+// console.log(oGameData.checkForGameOver());
 
 
 // console.log(oGameData.checkHorizontal());

@@ -281,24 +281,16 @@ const validateForm = () => {
         const color2 = document.getElementById("color2").value;
 
         // Check if the length of both nick name inputs have less characters than 5 -> throws an error.
-        if (nick1.length < 5 || nick2.length < 5) {
-            throw new Error(felMsg[10]);
-        }
+        if (nick1.length < 5 || nick2.length < 5) throw new Error(felMsg[10]);
 
         // Check if both nick names are equal.
-        if (nick1 == nick2) {
-            throw new Error(felMsg[11]);
-        }
+        if (nick1 == nick2) throw new Error(felMsg[11]);
 
         // Check if the colors are either pure black or white.
-        if (color1 == "#ffffff" || color2 == "#ffffff" || color1 == "#000000" || color2 == "#000000") {
-            throw new Error(felMsg[20]);
-        }
+        if (color1 == "#ffffff" || color2 == "#ffffff" || color1 == "#000000" || color2 == "#000000") throw new Error(felMsg[20]);
 
         // Check if the colors are the same.
-        if (color1 == color2) {
-            throw new Error(felMsg[21]);
-        }
+        if (color1 == color2) throw new Error(felMsg[21]);
 
         // Initiates the game
         initiateGame();

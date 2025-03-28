@@ -259,6 +259,66 @@ const initiateGame = () => {
 
     // Set the title to show who is the current player
     document.querySelector('.jumbotron h1').textContent = `Aktuell spelare är ${playerName}`;
+
+
+    // Table click event listener calling the executeMove function
+    document.querySelector('table').addEventListener('click', executeMove);
+}
+
+/**
+ *  Executes a new move as an event listener, needs to be applied on the table only.
+ */
+const executeMove = (e) => {
+    // check if the event target element is a table cell (td)
+    if (e.target.tagName === 'TD') {
+        const cell = e.target;
+
+        // Get the data-id retrieved from the targeted cell
+        const dataId = cell.attributes['data-id'].value;
+
+        // Abort the function if the gamefield at current target it already taken.
+        if (oGameData.gameField[dataId] != '') return;
+
+        // Set gamefield of current target's data id to the currentplayer
+        oGameData.gameField[dataId] = oGameData.currentPlayer;
+
+        // Checks whether or not the current player is player one.
+        const isPlayerOne = oGameData.currentPlayer == oGameData.playerOne;
+
+        // Applies background color and text to the current player's X or O and the color.
+        cell.style.backgroundColor = isPlayerOne ? oGameData.colorPlayerOne : oGameData.colorPlayerTwo;
+        cell.innerText = oGameData.currentPlayer;
+
+        // Change the current player to the next
+        oGameData.currentPlayer = isPlayerOne ? oGameData.playerTwo : oGameData.playerOne;
+        const playerName = isPlayerOne ? oGameData.nickNamePlayerTwo : oGameData.nickNamePlayerOne;
+
+        // Set the title to show who is the current player
+        document.querySelector('.jumbotron h1').textContent = `Aktuell spelare är ${playerName}`;
+
+        // Check if game over;
+        const isGameOver = oGameData.checkForGameOver();
+        if (isGameOver != 0) {
+            // Remove event listener from table, remove the game area and show the form again
+            document.querySelector('table').removeEventListener('click', executeMove);
+            document.getElementById('game-area').classList.add('d-none');
+            document.getElementsByTagName('form')[0].classList.remove('d-none');
+
+            // Retrieve the winner and put it in the message
+            let message = "";
+            switch (isGameOver) {
+                case 1: message = `${oGameData.nickNamePlayerOne} (${oGameData.playerOne}) är vinnare. Spela igen?`; break;
+                case 2: message = `${oGameData.nickNamePlayerTwo} (${oGameData.playerTwo}) är vinnare. Spela igen?`; break;
+                default: message = `Spelet är oavgjort. Spela igen?`; break;
+            }
+
+            // Set the title to show who is the current player
+            document.querySelector('h1').textContent = message;
+
+            // Reset the gamedata
+            oGameData.initGlobalObject();
+        }
+    }
 }
 
 /**

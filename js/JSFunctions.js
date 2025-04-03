@@ -48,7 +48,74 @@ oGameData.initGlobalObject = function () {
 
     //Timerid om användaren har klickat för checkboxen. 
     oGameData.timerId = null;
+}
 
+const createTimerInput = () => {
+    const input = document.createElement('input');
+    input.style.width = '2rem';
+    input.setAttribute('id', 'timer');
+    input.setAttribute('type', 'checkbox');
+
+    const col = document.createElement('div');
+
+    const label = document.createElement('label');
+    label.setAttribute('for', 'timer');
+    label.appendChild(document.createTextNode('Vill du begränsa tiden till 5 sekunder per drag?'));
+
+    col.appendChild(input);
+    col.appendChild(label);
+
+    col.style.flex = '1';
+    col.style.display = 'flex';
+    col.style.width = 'fit-content'
+    col.style.gap = '1rem';
+
+    const parent = document.getElementById('div-with-a');
+    const child = document.getElementById('newGame');
+
+    parent.insertBefore(col, child);
+}
+
+const initTimer = () => {
+    if (oGameData.timerId) {
+        console.log("Timer already running. Not starting a new one.");
+        return;
+    }
+
+    const totalSec = 5;
+    const secInMilliSec = 1000;
+
+    oGameData.timerId = setInterval(() => {
+        // Checks whether or not the current player is player one.
+        const isPlayerOne = oGameData.currentPlayer == oGameData.playerOne;
+
+        // Change the current player to the next
+        oGameData.currentPlayer = isPlayerOne ? oGameData.playerTwo : oGameData.playerOne;
+        const playerName = isPlayerOne ? oGameData.nickNamePlayerTwo : oGameData.nickNamePlayerOne;
+
+        console.log('magic timer... ' + oGameData.timerId);
+
+        // Set the title to show who is the current player
+        document.querySelector('.jumbotron h1').replaceChildren(document.createTextNode(`Aktuell spelare är ${playerName}`))
+    }, secInMilliSec * totalSec);
+}
+
+const clearTimer = () => {
+    if (oGameData.timerId) {
+        console.log("Timer cleared, ID:", oGameData.timerId);
+        clearInterval(oGameData.timerId);
+        oGameData.timerId = null;
+    } else {
+        console.log("No active timer to clear.");
+    }
+}
+
+const resetTimer = () => {
+    if (oGameData.timerId) {
+
+        console.log('timer resetted');
+        clearTimer(); initTimer();
+    }
 }
 
 /**
@@ -66,16 +133,6 @@ oGameData.checkForGameOver = function () {
     if (winner == 0) winner = oGameData.checkDiagonalLeftToRight();
     if (winner == 0) winner = oGameData.checkDiagonalRightToLeft();
     if (winner == 0) winner = oGameData.checkForDraw() ? 3 : 0;
-
-    // console.log(winner);
-
-    // switch (winner) {
-    //     case 0: return "No winner";
-    //     case 1: return "X is winner";
-    //     case 2: return "O is winner";
-    //     case 3: return "Draw";
-    //     default: return "Error";
-    // }
 
     return winner;
 }
@@ -232,7 +289,7 @@ const initiateGame = () => {
     document.getElementById('game-area').classList.remove('d-none');
 
     // Clear the error messages after validating correctly.
-    document.getElementById("errorMsg").innerText = "";
+    document.getElementById('errorMsg').replaceChildren(document.createTextNode(''));
 
     // Gets the formdata again (would have prefered using parameters of the function instead.)
     oGameData.nickNamePlayerOne = document.getElementById("nick1").value;
@@ -258,11 +315,16 @@ const initiateGame = () => {
     oGameData.currentPlayer = random ? oGameData.playerOne : oGameData.playerTwo;
 
     // Set the title to show who is the current player
-    document.querySelector('.jumbotron h1').textContent = `Aktuell spelare är ${playerName}`;
+    document.querySelector('.jumbotron h1').replaceChildren(document.createTextNode(`Aktuell spelare är ${playerName}`));
 
 
     // Table click event listener calling the executeMove function
     document.querySelector('table').addEventListener('click', executeMove);
+
+    oGameData.timerEnabled = document.getElementById("timer").checked;
+
+    console.log('Timer started? ' + oGameData.timerEnabled);
+    if (oGameData.timerEnabled) initTimer();
 }
 
 /**
@@ -294,7 +356,7 @@ const executeMove = (e) => {
         const playerName = isPlayerOne ? oGameData.nickNamePlayerTwo : oGameData.nickNamePlayerOne;
 
         // Set the title to show who is the current player
-        document.querySelector('.jumbotron h1').textContent = `Aktuell spelare är ${playerName}`;
+        document.querySelector('.jumbotron h1').replaceChildren(document.createTextNode(`Aktuell spelare är ${playerName}`));
 
         // Check if game over;
         const isGameOver = oGameData.checkForGameOver();
@@ -313,11 +375,13 @@ const executeMove = (e) => {
             }
 
             // Set the title to show who is the current player
-            document.querySelector('h1').textContent = message;
+            document.querySelector('h1').replaceChildren(document.createTextNode(message));
+
+            clearTimer();
 
             // Reset the gamedata
             oGameData.initGlobalObject();
-        }
+        } else resetTimer();
     }
 }
 
@@ -356,7 +420,7 @@ const validateForm = () => {
         initiateGame();
     } catch (oError) {
         // Puts the error message in the errorMsg element.
-        document.getElementById("errorMsg").innerText = oError.message;
+        document.getElementById('errorMsg').replaceChildren(document.createTextNode(oError.message));
     }
 }
 
@@ -366,6 +430,8 @@ window.onload = () => {
     document.getElementById('game-area').classList.add('d-none');
 
     document.getElementById('newGame').onclick = validateForm;
+
+    createTimerInput();
 }
 
 //Testutskrifter
